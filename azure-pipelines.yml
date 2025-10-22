@@ -22,7 +22,7 @@ steps:
   inputs:
     containerregistrytype: 'Azure Container Registry'
     azureSubscription: 'azure-subscription-1'
-    dockerComposeFile: '**/docker-compose.yml'
+    dockerComposeFile: './docker-compose.yml'
     dockerComposeFileArgs: |
       MYSQL_ROOT_PASSWORD=root
       MYSQL_DATABASE=mytodo
