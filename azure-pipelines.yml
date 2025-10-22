@@ -17,3 +17,22 @@ steps:
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
+
+- task: DockerCompose@1
+  inputs:
+    containerregistrytype: 'Azure Container Registry'
+    azureSubscription: 'azure-subscription-1'
+    dockerComposeFile: '**/docker-compose.yml'
+    dockerComposeFileArgs: |
+      MYSQL_ROOT_PASSWORD=root
+      MYSQL_DATABASE=mytodo
+      MYSQL_USER=mytodo
+      MYSQL_PASSWORD=mytodo123
+      
+      SECRET_KEY=mytodo_secret_key_change_in_production
+      DATABASE_URL=mysql+pymysql://root:root@mysql_container:3306/
+      DATABASE_NAME=mytodo
+      REDIS_URL=redis://redis:6379
+      ALGORITHM=HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES=30
+    action: 'Run a Docker Compose command'
