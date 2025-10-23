@@ -21,17 +21,15 @@ output acrName string = acr.outputs.acrName
 @description('Current UTC time for unique password.')
 param currentUtc string = utcNow()
 
+var sqlAdminPassword = '${namePrefix}sql${uniqueString(resourceGroup().id, currentUtc)}'
+
 module keyVault 'modules/keyvault.bicep' = {
   name: 'keyVaultModule'
   params: {
     location: location
     keyVaultName: keyVaultName
-    sqlAdminPassword: '${namePrefix}sql${uniqueString(resourceGroup().id, currentUtc)}'
+    sqlAdminPassword: sqlAdminPassword
   }
-}
-
-resource kv 'Microsoft.KeyVault/vaults@2025-05-01' existing = {
-  name: keyVaultName
 }
 
 module mysql 'modules/mysql.bicep' = {
@@ -39,7 +37,7 @@ module mysql 'modules/mysql.bicep' = {
   params: {
     namePrefix: namePrefix
     location: location
-    mysqlAdminPassword: kv.getSecret('sqlAdminPassword')
+    mysqlAdminPassword: sqlAdminPassword
   }
 }
 
