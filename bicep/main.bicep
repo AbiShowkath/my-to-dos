@@ -23,28 +23,28 @@ param currentUtc string = utcNow()
 
 var sqlAdminPassword = '${namePrefix}sql${uniqueString(resourceGroup().id, currentUtc)}'
 
-module keyVault 'modules/keyvault.bicep' = {
-  name: 'keyVaultModule'
-  params: {
-    location: location
-    keyVaultName: keyVaultName
-    sqlAdminPassword: sqlAdminPassword
-  }
-}
+// module keyVault 'modules/keyvault.bicep' = {
+//   name: 'keyVaultModule'
+//   params: {
+//     location: location
+//     keyVaultName: keyVaultName
+//     sqlAdminPassword: sqlAdminPassword
+//   }
+// }
 
-module mysql 'modules/mysql.bicep' = {
-  name: 'mysqlModule'
-  params: {
-    namePrefix: namePrefix
-    location: location
-    mysqlAdminPassword: sqlAdminPassword
-  }
-}
+// module mysql 'modules/mysql.bicep' = {
+//   name: 'mysqlModule'
+//   params: {
+//     namePrefix: namePrefix
+//     location: location
+//     mysqlAdminPassword: sqlAdminPassword
+//   }
+// }
 
-module redis 'modules/redis.bicep' = {
-  name: 'redisModule'
-  params: {
-    namePrefix: namePrefix
-    location: location
-  }
-}
+// module redis 'modules/redis.bicep' = {
+//   name: 'redisModule'
+//   params: {
+//     namePrefix: namePrefix
+//     location: location
+//   }
+// }

@@ -99,7 +99,13 @@ stages:
           inlineScript: |
             acrLoginServer=$(acrName).azurecr.io
             az acr login -n $(acrName)
+            docker pull mysql:8.0
+            docker pull redis:alpine
+            docker tag mysql:8.0 $(acrLoginServer)/mysql:8.0
+            docker tag redis:alpine $(acrLoginServer)/redis:alpine
             docker tag $(namePrefix)-api:$(Build.BuildId) $(acrLoginServer)/$(namePrefix)-api:latest
             docker tag $(namePrefix)-app:$(Build.BuildId) $(acrLoginServer)/$(namePrefix)-app:latest
+            docker push $(acrLoginServer)/mysql:8.0
+            docker push $(acrLoginServer)/redis:alpine
             docker push $(acrLoginServer)/$(namePrefix)-api:latest
             docker push $(acrLoginServer)/$(namePrefix)-app:latest
