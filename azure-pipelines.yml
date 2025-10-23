@@ -1,38 +1,105 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- main
+- azure-pipelines
+
+variables:
+  namePrefix: 'mytodo'
+  vmImageName: 'ubuntu-latest'
+
+  # system.debug: true
+
+  buildConfiguration: 'Release'
+
+  # Azure Resource Variables
+  resourceGroupName: $(namePrefix)appRG
+  location: 'southindia'
+
+  # Bicep files
+  deploymentName: 'main'
+  templateFile: 'bicep/$(deploymentName).bicep'
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: $(vmImageName)
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+parameters:
+- name: serviceConnection
+  displayName: Azure Service Connection Name
+  type: string
+  default: azure-subscription-1
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
-
-- task: DockerCompose@1
-  inputs:
-    containerregistrytype: 'Azure Container Registry'
-    azureSubscription: 'azure-subscription-1'
-    dockerComposeFile: './docker-compose.yml'
-    dockerComposeFileArgs: |
-      MYSQL_ROOT_PASSWORD=root
-      MYSQL_DATABASE=mytodo
-      MYSQL_USER=mytodo
-      MYSQL_PASSWORD=mytodo123
+stages:
+- stage: Infrastructure
+  displayName: 'Create or Update Azure Resources'
+  jobs:
+  - job: DeployACRBicep
+    displayName: 'Deploy ACR Bicep Template to Azure'  
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+      - task: AzureResourceManagerTemplateDeployment@3
+        displayName: 'Deploy ACR Bicep Template'
+        inputs:
+          deploymentScope: 'Resource Group'
+          action: 'Create Or Update Resource Group'
+          resourceGroupName: '$(resourceGroupName)'
+          location: '$(location)'
+          templateLocation: 'Linked artifact'
+          csmFile: '$(templateFile)'
+          overrideParameters: '-namePrefix $(namePrefix)app'
+          deploymentMode: 'Incremental'
+          deploymentName: '$(deploymentName)'
+          connectedServiceName: '${{ parameters.serviceConnection }}'
       
-      SECRET_KEY=mytodo_secret_key_change_in_production
-      DATABASE_URL=mysql+pymysql://root:root@mysql_container:3306/
-      DATABASE_NAME=mytodo
-      REDIS_URL=redis://redis:6379
-      ALGORITHM=HS256
-      ACCESS_TOKEN_EXPIRE_MINUTES=30
-    action: 'Run a Docker Compose command'
+      - task: AzureCLI@2
+        displayName: 'Get Outputs'
+        name: GetACROutputs
+        inputs:
+          azureSubscription: '${{ parameters.serviceConnection }}'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            acrNameOutput=$(az deployment group show --name $(deploymentName) --resource-group $(resourceGroupName) --query properties.outputs.acrName.value -o tsv)
+            echo "ACR Name: $acrNameOutput"
+            echo "##vso[task.setvariable variable=acrName;isOutput=true]$acrNameOutput"
+
+- stage: Build_and_Push_Docker_Images
+  displayName: 'Build and Push Docker Images'
+  dependsOn: Infrastructure
+  variables:
+    acrName: $[stageDependencies.Infrastructure.DeployACRBicep.outputs['GetACROutputs.acrName']]
+  jobs:
+  - job: BuildAndPushDockerImage
+    displayName: 'Build and Push Docker Image'
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+      - task: Docker@2
+        displayName: 'Build backend Docker image'
+        inputs:
+          command: 'build'
+          Dockerfile: './api/Dockerfile'
+          repository: '$(namePrefix)-api'
+          tags: |
+            $(Build.BuildId)
+
+      - task: Docker@2
+        displayName: 'Build frontend Docker image'
+        inputs:
+          command: 'build'
+          Dockerfile: './app/Dockerfile'
+          repository: '$(namePrefix)-app'
+          tags: |
+            $(Build.BuildId)
+
+      - task: AzureCLI@2
+        displayName: 'Login to ACR'
+        inputs:
+          azureSubscription: '${{ parameters.serviceConnection }}'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            acrLoginServer=$(acrName).azurecr.io
+            az acr login -n $(acrName)
+            docker tag $(namePrefix)-api:$(Build.BuildId) $(acrLoginServer)/$(namePrefix)-api:latest
+            docker tag $(namePrefix)-app:$(Build.BuildId) $(acrLoginServer)/$(namePrefix)-app:latest
+            docker push $(acrLoginServer)/$(namePrefix)-api:latest
+            docker push $(acrLoginServer)/$(namePrefix)-app:latest
