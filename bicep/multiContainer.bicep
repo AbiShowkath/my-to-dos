@@ -10,12 +10,26 @@ param mysqlAdminPassword string = newGuid()
 @secure()
 param secretKey string = newGuid()
 
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+  name: '${namePrefix}-logs'
+  location: location
+  properties: {
+    sku: {
+      name: 'Free'
+    }
+  }
+}
+
 resource containerAppEnv 'Microsoft.App/managedEnvironments@2025-01-01' = {
   name: '${namePrefix}-env'
   location: location
   properties: {
     appLogsConfiguration: {
-      destination: 'none'
+      destination: 'log-analytics'
+      logAnalyticsConfiguration: {
+        customerId: logAnalyticsWorkspace.properties.customerId
+        sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
+      }
     }
   }
 }
