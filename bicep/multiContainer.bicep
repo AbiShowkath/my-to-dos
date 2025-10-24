@@ -129,8 +129,7 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
       registries: [
         {
           server: acrLoginServer
-          username: acr.listCredentials().username
-          passwordSecretRef: acr.listCredentials().passwords[0].value
+          identity: 'system'
         }
       ]
     }
@@ -217,8 +216,7 @@ resource frontendApp 'Microsoft.App/containerApps@2025-01-01' = {
       registries: [
         {
           server: acrLoginServer
-          username: acr.listCredentials().username
-          passwordSecretRef: acr.listCredentials().passwords[0].value
+          identity: 'system'
         }
       ]
     }
