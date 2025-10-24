@@ -12,8 +12,10 @@ param mysqlAdminPassword string = newGuid()
 @secure()
 param secretKey string = newGuid()
 
+var appName = '${namePrefix}app'
+
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
-  name: '${namePrefix}-logs'
+  name: '${appName}-logs'
   location: location
   properties: {
     sku: {
@@ -23,7 +25,7 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10
 }
 
 resource containerAppEnv 'Microsoft.App/managedEnvironments@2025-01-01' = {
-  name: '${namePrefix}-env'
+  name: '${appName}-env'
   location: location
   properties: {
     appLogsConfiguration: {
@@ -37,7 +39,7 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2025-01-01' = {
 }
 
 resource redisApp 'Microsoft.App/containerApps@2025-01-01' = {
-  name: '${namePrefix}-redis'
+  name: '${appName}-redis'
   location: location
   properties: {
     managedEnvironmentId: containerAppEnv.id
@@ -69,7 +71,7 @@ resource redisApp 'Microsoft.App/containerApps@2025-01-01' = {
 }
 
 resource mysqlApp 'Microsoft.App/containerApps@2025-01-01' = {
-  name: '${namePrefix}-mysql'
+  name: '${appName}-mysql'
   location: location
   properties: {
     managedEnvironmentId: containerAppEnv.id
@@ -115,7 +117,7 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
 }
 
 resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
-  name: '${namePrefix}-backend'
+  name: '${appName}-backend'
   location: location
   properties: {
     managedEnvironmentId: containerAppEnv.id
@@ -211,7 +213,7 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
 }
 
 resource frontendApp 'Microsoft.App/containerApps@2025-01-01' = {
-  name: '${namePrefix}-frontend'
+  name: '${appName}-frontend'
   location: location
   properties: {
     managedEnvironmentId: containerAppEnv.id

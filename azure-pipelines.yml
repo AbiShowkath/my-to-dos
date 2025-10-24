@@ -129,7 +129,7 @@ stages:
           location: '$(location)'
           templateLocation: 'Linked artifact'
           csmFile: '$(multiContainerTemplateFile)'
-          overrideParameters: '-namePrefix $(namePrefix)app -acrName $(acrName)'
+          overrideParameters: '-namePrefix $(namePrefix) -acrName $(acrName)'
           deploymentMode: 'Incremental'
           deploymentName: '$(multiContainerDeploymentName)'
           connectedServiceName: '${{ parameters.serviceConnection }}'
