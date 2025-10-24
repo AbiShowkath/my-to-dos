@@ -126,10 +126,17 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
         // transport: 'auto'
         allowInsecure: true
       }
+      secrets: [
+        {
+          name: 'acr-password'
+          value: acr.listCredentials().passwords[0].value
+        }
+      ]
       registries: [
         {
           server: acrLoginServer
-          identity: 'system'
+          username: acr.listCredentials().username
+          passwordSecretRef: 'acr-password'
         }
       ]
     }
@@ -213,10 +220,17 @@ resource frontendApp 'Microsoft.App/containerApps@2025-01-01' = {
         external: true
         targetPort: 3000
       }
+      secrets: [
+        {
+          name: 'acr-password'
+          value: acr.listCredentials().passwords[0].value
+        }
+      ]
       registries: [
         {
           server: acrLoginServer
-          identity: 'system'
+          username: acr.listCredentials().username
+          passwordSecretRef: 'acr-password'
         }
       ]
     }
