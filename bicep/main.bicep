@@ -1,7 +1,7 @@
 param namePrefix string = 'mytodoapp'
 param location string = resourceGroup().location
 
-var keyVaultName = '${namePrefix}-kv-${uniqueString(resourceGroup().id)}'
+// var keyVaultName = '${namePrefix}-kv-${uniqueString(resourceGroup().id)}'
 
 @minLength(5)
 @maxLength(50)
@@ -18,10 +18,8 @@ module acr 'modules/acr.bicep' = {
 
 output acrName string = acr.outputs.acrName
 
-@description('Current UTC time for unique password.')
-param currentUtc string = utcNow()
-
-var sqlAdminPassword = '${namePrefix}sql${uniqueString(resourceGroup().id, currentUtc)}'
+// @secure()
+// param sqlAdminPassword string = newGuid()
 
 // module keyVault 'modules/keyvault.bicep' = {
 //   name: 'keyVaultModule'
@@ -41,10 +39,3 @@ var sqlAdminPassword = '${namePrefix}sql${uniqueString(resourceGroup().id, curre
 //   }
 // }
 
-// module redis 'modules/redis.bicep' = {
-//   name: 'redisModule'
-//   params: {
-//     namePrefix: namePrefix
-//     location: location
-//   }
-// }
