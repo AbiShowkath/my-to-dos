@@ -53,8 +53,8 @@ resource redisApp 'Microsoft.App/containerApps@2025-01-01' = {
           name: 'redis'
           image: 'redis:alpine'
           resources: {
-            cpu: 1
-            memory: '1Gi'
+            cpu: 0.5
+            memory: 1.0Gi
           }
         }
       ]
@@ -85,8 +85,8 @@ resource mysqlApp 'Microsoft.App/containerApps@2025-01-01' = {
           name: 'mysql'
           image: 'mysql:8.0'
           resources: {
-            cpu: 1
-            memory: '2Gi'
+            cpu: 0.5
+            memory: 1.0Gi
           }
           env: [
             {
@@ -127,8 +127,8 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
           name: 'backend'
           image: backendImage
           resources: {
-            cpu: 1
-            memory: '1Gi'
+            cpu: 0.5
+            memory: 1.0Gi
           }
           env: [
             {
@@ -207,8 +207,8 @@ resource frontendApp 'Microsoft.App/containerApps@2025-01-01' = {
           name: 'frontend'
           image: frontendImage
           resources: {
-            cpu: 1
-            memory: '1Gi'
+            cpu: 0.5
+            memory: 1.0Gi
           }
           env: [
             {
