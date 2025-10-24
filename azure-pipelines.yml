@@ -109,7 +109,9 @@ stages:
 
 - stage: Deployment
   displayName: 'Deploy multi-container App to Azure Container Apps'
-  dependsOn: Infrastructure
+  dependsOn: 
+    - Infrastructure
+    - Build_and_Push_Docker_Images
   variables:
     acrName: $[stageDependencies.Infrastructure.DeployACRBicep.outputs['GetACROutputs.acrName']]
   jobs:
