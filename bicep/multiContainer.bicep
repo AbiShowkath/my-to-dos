@@ -1,8 +1,10 @@
 param location string = resourceGroup().location
 param namePrefix string = 'mytodoapp'
 
-param frontendImage string
-param backendImage string
+param acrName string
+param acrLoginServer string = '${acrName}.azurecr.io'
+param frontendImage string = '${acrLoginServer}/${namePrefix}-app:latest'
+param backendImage string = '${acrLoginServer}/${namePrefix}-api:latest'
 
 @secure()
 param mysqlAdminPassword string = newGuid()
@@ -108,6 +110,10 @@ resource mysqlApp 'Microsoft.App/containerApps@2025-01-01' = {
   }
 }
 
+resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
+  name: acrName
+}
+
 resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
   name: '${namePrefix}-backend'
   location: location
@@ -120,12 +126,20 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
         // transport: 'auto'
         allowInsecure: true
       }
+      registries: [
+        {
+          server: acrLoginServer
+          username: acr.listCredentials().username
+          passwordSecretRef: acr.listCredentials().passwords[0].value
+        }
+      ]
     }
     template: {
       containers: [
         {
           name: 'backend'
           image: backendImage
+          
           resources: {
             cpu: 1
             memory: '2.0Gi'
@@ -200,6 +214,13 @@ resource frontendApp 'Microsoft.App/containerApps@2025-01-01' = {
         external: true
         targetPort: 3000
       }
+      registries: [
+        {
+          server: acrLoginServer
+          username: acr.listCredentials().username
+          passwordSecretRef: acr.listCredentials().passwords[0].value
+        }
+      ]
     }
     template: {
       containers: [

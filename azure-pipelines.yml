@@ -127,7 +127,7 @@ stages:
           location: '$(location)'
           templateLocation: 'Linked artifact'
           csmFile: '$(multiContainerTemplateFile)'
-          overrideParameters: '-namePrefix $(namePrefix)app -frontendImage $(acrName).azurecr.io/$(namePrefix)-app:latest -backendImage $(acrName).azurecr.io/$(namePrefix)-api:latest'
+          overrideParameters: '-namePrefix $(namePrefix)app -acrName $(acrName)'
           deploymentMode: 'Incremental'
           deploymentName: '$(multiContainerDeploymentName)'
           connectedServiceName: '${{ parameters.serviceConnection }}'
