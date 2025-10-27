@@ -11,7 +11,7 @@ variables:
 
   # Azure Resource Variables
   resourceGroupName: $(namePrefix)appRG
-  location: 'southindia'
+  location: 'eastus'
 
   # Bicep files
   deploymentName: 'main'

@@ -143,11 +143,11 @@ resource mysqlApp 'Microsoft.DBforMySQL/flexibleServers@2024-12-30' existing = {
 }
 
 resource redisApp 'Microsoft.Cache/redis@2024-11-01' existing = {
-  name: '${namePrefix}_redis'
+  name: '${namePrefix}-redis'
 }
 
 resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
-  name: '${appName}_backend'
+  name: '${appName}-backend'
   location: location
   properties: {
     managedEnvironmentId: containerAppEnv.id
@@ -243,7 +243,7 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
 }
 
 resource frontendApp 'Microsoft.App/containerApps@2025-01-01' = {
-  name: '${appName}_frontend'
+  name: '${appName}-frontend'
   location: location
   properties: {
     managedEnvironmentId: containerAppEnv.id

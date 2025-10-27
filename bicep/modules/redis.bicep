@@ -2,7 +2,7 @@ param namePrefix string = 'mytodoapp'
 param location string = resourceGroup().location
 
 resource redisCache 'Microsoft.Cache/redis@2024-11-01' = {
-  name: '${namePrefix}_redis'
+  name: '${namePrefix}-redis'
   location: location
   properties: {
     sku: {
