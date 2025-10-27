@@ -1,9 +1,9 @@
 param location string
 param virtualNetworkName string
-param infraSubnetName string
+param subnetName string
 param networkSecurityGroupName string
 param addressPrefix string
-param infraSubnetAddressPrefix string
+param subnetAddressPrefix string
 
 resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-09-01' = {
   name: networkSecurityGroupName
@@ -38,17 +38,20 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-09-01' = {
     }
     subnets: [
       {
-        name: infraSubnetName
+        name: subnetName
         properties: {
-          addressPrefix: infraSubnetAddressPrefix
-          delegations: [
-            {
-              name: 'delegation'
-              properties: {
-                serviceName: 'Microsoft.App/environments'
-              }
-            }
-          ]
+          addressPrefix: subnetAddressPrefix
+          networkSecurityGroup: {
+            id: networkSecurityGroup.id
+          }
+          // delegations: [
+          //   {
+          //     name: 'delegation'
+          //     properties: {
+          //       serviceName: 'Microsoft.App/environments'
+          //     }
+          //   }
+          // ]
         }
       }
     ]
@@ -58,4 +61,3 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-09-01' = {
 output virtualNetworkId string = virtualNetwork.id
 output networkSecurityGroupId string = networkSecurityGroup.id
 output networkSubnetId string = virtualNetwork.properties.subnets[0].id
-output infraSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetworkName, infraSubnetName)
