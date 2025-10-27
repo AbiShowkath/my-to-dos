@@ -10,10 +10,14 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://mytodo:mytodo123@localhost:3306/mytodo")
 DATABASE_NAME = os.getenv("DATABASE_NAME", "mytodo")
 
+print("Connecting to database at:", DATABASE_URL)
+
 engine = create_engine(DATABASE_URL)
 with engine.connect() as connection:
     connection.execute(text(f"CREATE DATABASE IF NOT EXISTS {DATABASE_NAME};"))
     print(f"Database '{DATABASE_NAME}' ensured to exist.")
+
+print("Using database:", DATABASE_NAME)
 
 engine = create_engine(DATABASE_URL + DATABASE_NAME)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -112,6 +112,8 @@ resource mysqlApp 'Microsoft.App/containerApps@2025-01-01' = {
   }
 }
 
+var mysqlDatabaseUrl = 'mysql+pymysql://root:${mysqlAdminPassword}@https://${mysqlApp.properties.configuration.ingress.fqdn}:3306/'
+
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
   name: acrName
 }
@@ -187,7 +189,7 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
             }
             {
               name: 'DATABASE_URL'
-              value: 'mysql+pymysql://root:${mysqlAdminPassword}@${mysqlApp.properties.configuration.ingress.fqdn}:3306/'
+              value: 'mysql+pymysql://root:${mysqlAdminPassword}@${mysqlDatabaseUrl}'
             }
             {
               name: 'REDIS_URL'
@@ -250,7 +252,7 @@ resource frontendApp 'Microsoft.App/containerApps@2025-01-01' = {
           env: [
             {
               name: 'REACT_APP_BASE_URL'
-              value: 'http://${backendApp.properties.configuration.ingress.fqdn}:8000'
+              value: 'https://${backendApp.properties.configuration.ingress.fqdn}:8000'
             }
           ]
         }

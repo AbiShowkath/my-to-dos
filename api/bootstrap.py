@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 import time
 
 def wait_for_mysql(database_url, max_retries=30, retry_interval=2):
+    print("database_url:", database_url)
     """Wait for MySQL to be ready"""
     from sqlalchemy import create_engine
     from sqlalchemy.exc import OperationalError
