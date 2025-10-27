@@ -14,7 +14,7 @@ param secretKey string = newGuid()
 
 var appName = '${namePrefix}app'
 
-var subnetAddressPrefix = '10.1.0.0/24'
+var subnetAddressPrefix = '10.1.0.0/22'
 var addressPrefix = '10.1.0.0/16'
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
