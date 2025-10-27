@@ -30,12 +30,21 @@ output acrName string = acr.outputs.acrName
 //   }
 // }
 
-// module mysql 'modules/mysql.bicep' = {
-//   name: 'mysqlModule'
-//   params: {
-//     namePrefix: namePrefix
-//     location: location
-//     mysqlAdminPassword: sqlAdminPassword
-//   }
-// }
+module mysql 'modules/mysql.bicep' = {
+  name: 'mysqlModule'
+  params: {
+    namePrefix: namePrefix
+    location: location
+    administratorLogin: 'sqladminuser'
+    administratorLoginPassword: 'sqlAdminPassword123'
+  }
+}
+
+module redis 'modules/redis.bicep' = {
+  name: 'redisModule'
+  params: {
+    namePrefix: namePrefix
+    location: location
+  }
+}
 

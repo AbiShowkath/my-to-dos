@@ -41,9 +41,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-09-01' = {
         name: subnetName
         properties: {
           addressPrefix: subnetAddressPrefix
-          networkSecurityGroup: {
-            id: networkSecurityGroup.id
-          }
+          // networkSecurityGroup: {
+          //   id: networkSecurityGroup.id
+          // }
           // delegations: [
           //   {
           //     name: 'delegation'

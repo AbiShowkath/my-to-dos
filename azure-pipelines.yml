@@ -64,72 +64,72 @@ stages:
             echo "ACR Name: $acrNameOutput"
             echo "##vso[task.setvariable variable=acrName;isOutput=true]$acrNameOutput"
 
-- stage: Build_and_Push_Docker_Images
-  displayName: 'Build and Push Docker Images'
-  dependsOn: Infrastructure
-  variables:
-    acrName: $[stageDependencies.Infrastructure.DeployACRBicep.outputs['GetACROutputs.acrName']]
-  jobs:
-  - job: BuildAndPushDockerImage
-    displayName: 'Build and Push Docker Image'
-    pool:
-      vmImage: $(vmImageName)
-    steps:
-      - task: Docker@2
-        displayName: 'Build backend Docker image'
-        inputs:
-          command: 'build'
-          Dockerfile: './api/Dockerfile'
-          repository: '$(namePrefix)-api'
-          tags: |
-            $(Build.BuildId)
+# - stage: Build_and_Push_Docker_Images
+#   displayName: 'Build and Push Docker Images'
+#   dependsOn: Infrastructure
+#   variables:
+#     acrName: $[stageDependencies.Infrastructure.DeployACRBicep.outputs['GetACROutputs.acrName']]
+#   jobs:
+#   - job: BuildAndPushDockerImage
+#     displayName: 'Build and Push Docker Image'
+#     pool:
+#       vmImage: $(vmImageName)
+#     steps:
+#       - task: Docker@2
+#         displayName: 'Build backend Docker image'
+#         inputs:
+#           command: 'build'
+#           Dockerfile: './api/Dockerfile'
+#           repository: '$(namePrefix)-api'
+#           tags: |
+#             $(Build.BuildId)
 
-      - task: Docker@2
-        displayName: 'Build frontend Docker image'
-        inputs:
-          command: 'build'
-          Dockerfile: './app/Dockerfile'
-          repository: '$(namePrefix)-app'
-          tags: |
-            $(Build.BuildId)
+#       - task: Docker@2
+#         displayName: 'Build frontend Docker image'
+#         inputs:
+#           command: 'build'
+#           Dockerfile: './app/Dockerfile'
+#           repository: '$(namePrefix)-app'
+#           tags: |
+#             $(Build.BuildId)
 
-      - task: AzureCLI@2
-        displayName: 'Login to ACR'
-        inputs:
-          azureSubscription: '${{ parameters.serviceConnection }}'
-          scriptType: 'bash'
-          scriptLocation: 'inlineScript'
-          inlineScript: |
-            acrLoginServer=$(acrName).azurecr.io
-            az acr login -n $(acrName)
-            docker tag $(namePrefix)-api:$(Build.BuildId) $acrLoginServer/$(namePrefix)-api:latest
-            docker tag $(namePrefix)-app:$(Build.BuildId) $acrLoginServer/$(namePrefix)-app:latest
-            docker push $acrLoginServer/$(namePrefix)-api:latest
-            docker push $acrLoginServer/$(namePrefix)-app:latest
+#       - task: AzureCLI@2
+#         displayName: 'Login to ACR'
+#         inputs:
+#           azureSubscription: '${{ parameters.serviceConnection }}'
+#           scriptType: 'bash'
+#           scriptLocation: 'inlineScript'
+#           inlineScript: |
+#             acrLoginServer=$(acrName).azurecr.io
+#             az acr login -n $(acrName)
+#             docker tag $(namePrefix)-api:$(Build.BuildId) $acrLoginServer/$(namePrefix)-api:latest
+#             docker tag $(namePrefix)-app:$(Build.BuildId) $acrLoginServer/$(namePrefix)-app:latest
+#             docker push $acrLoginServer/$(namePrefix)-api:latest
+#             docker push $acrLoginServer/$(namePrefix)-app:latest
 
-- stage: Deployment
-  displayName: 'Deploy multi-container App to Azure Container Apps'
-  dependsOn: 
-    - Infrastructure
-    - Build_and_Push_Docker_Images
-  variables:
-    acrName: $[stageDependencies.Infrastructure.DeployACRBicep.outputs['GetACROutputs.acrName']]
-  jobs:
-  - job: DeployMultiContainerApp
-    displayName: 'Deploy Multi-Container App'
-    pool:
-      vmImage: $(vmImageName)
-    steps:
-      - task: AzureResourceManagerTemplateDeployment@3
-        displayName: 'Deploy Multi-Container Bicep Template'
-        inputs:
-          deploymentScope: 'Resource Group'
-          action: 'Create Or Update Resource Group'
-          resourceGroupName: '$(resourceGroupName)'
-          location: '$(location)'
-          templateLocation: 'Linked artifact'
-          csmFile: '$(multiContainerTemplateFile)'
-          overrideParameters: '-namePrefix $(namePrefix) -acrName $(acrName)'
-          deploymentMode: 'Incremental'
-          deploymentName: '$(multiContainerDeploymentName)'
-          connectedServiceName: '${{ parameters.serviceConnection }}'
+# - stage: Deployment
+#   displayName: 'Deploy multi-container App to Azure Container Apps'
+#   dependsOn: 
+#     - Infrastructure
+#     - Build_and_Push_Docker_Images
+#   variables:
+#     acrName: $[stageDependencies.Infrastructure.DeployACRBicep.outputs['GetACROutputs.acrName']]
+#   jobs:
+#   - job: DeployMultiContainerApp
+#     displayName: 'Deploy Multi-Container App'
+#     pool:
+#       vmImage: $(vmImageName)
+#     steps:
+#       - task: AzureResourceManagerTemplateDeployment@3
+#         displayName: 'Deploy Multi-Container Bicep Template'
+#         inputs:
+#           deploymentScope: 'Resource Group'
+#           action: 'Create Or Update Resource Group'
+#           resourceGroupName: '$(resourceGroupName)'
+#           location: '$(location)'
+#           templateLocation: 'Linked artifact'
+#           csmFile: '$(multiContainerTemplateFile)'
+#           overrideParameters: '-namePrefix $(namePrefix) -acrName $(acrName)'
+#           deploymentMode: 'Incremental'
+#           deploymentName: '$(multiContainerDeploymentName)'
+#           connectedServiceName: '${{ parameters.serviceConnection }}'
