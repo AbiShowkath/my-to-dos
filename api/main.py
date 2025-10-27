@@ -16,7 +16,7 @@ app = FastAPI(title="MyTodo API", description="Todo List API with authentication
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React app URL
+    allow_origins=["*"],  # React app URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,6 +28,8 @@ def startup_event():
 
 @app.post("/register", response_model=UserSchema)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
+    print("Registering user:", user.username)
+
     # Check if user already exists
     db_user = db.query(User).filter(User.username == user.username).first()
     if db_user:

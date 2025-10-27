@@ -3,6 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
+  console.log('API Base URL:', process.env.REACT_APP_BASE_URL);
+
   const [formData, setFormData] = useState({
     username: '',
     password: ''

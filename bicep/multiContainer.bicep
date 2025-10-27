@@ -45,9 +45,10 @@ resource redisApp 'Microsoft.App/containerApps@2025-01-01' = {
     managedEnvironmentId: containerAppEnv.id
     configuration: {
       ingress: {
-        external: true
+        external: false
         targetPort: 6379
-        transport: 'auto'
+        // transport: 'tcp'
+        allowInsecure: true
       }
     }
     template: {
@@ -76,9 +77,10 @@ resource mysqlApp 'Microsoft.App/containerApps@2025-01-01' = {
     managedEnvironmentId: containerAppEnv.id
     configuration: {
       ingress: {
-        external: true
+        external: false
         targetPort: 3306
-        transport: 'auto'
+        // transport: 'tcp'
+        allowInsecure: true
       }
     }
     template: {
@@ -121,9 +123,10 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
     managedEnvironmentId: containerAppEnv.id
     configuration: {
       ingress: {
-        external: true
+        external: false
         targetPort: 8000
-        transport: 'auto'
+        // transport: 'auto'
+        allowInsecure: true
       }
       secrets: [
         {
@@ -218,7 +221,8 @@ resource frontendApp 'Microsoft.App/containerApps@2025-01-01' = {
       ingress: {
         external: true
         targetPort: 3000
-        transport: 'auto'
+        allowInsecure: true
+        transport: 'http'
       }
       secrets: [
         {
