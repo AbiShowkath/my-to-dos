@@ -14,7 +14,7 @@ param secretKey string = newGuid()
 
 var appName = '${namePrefix}app'
 
-var subnetAddressPrefix = '10.1.0.0/22'
+var infraSubnetAddressPrefix = '10.1.0.0/22'
 var addressPrefix = '10.1.0.0/16'
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
@@ -32,21 +32,21 @@ module network 'modules/network.bicep' = {
   params: {
     location: location
     virtualNetworkName: '${appName}-vnet'
-    subnetName: '${appName}-subnet'
+    infraSubnetName: '${appName}-infra-subnet'
     networkSecurityGroupName: '${appName}-nsg'
     addressPrefix: addressPrefix
-    subnetAddressPrefix: subnetAddressPrefix
+    infraSubnetAddressPrefix: infraSubnetAddressPrefix
   }
 }
 
-var networkSubnetId = network.outputs.networkSubnetId
+var infraSubnetId = network.outputs.infraSubnetId
 
 resource containerAppEnv 'Microsoft.App/managedEnvironments@2025-01-01' = {
   name: '${appName}-env'
   location: location
   properties: {
     vnetConfiguration: {
-      infrastructureSubnetId: networkSubnetId
+      infrastructureSubnetId: infraSubnetId
     }
     appLogsConfiguration: {
       destination: 'log-analytics'
