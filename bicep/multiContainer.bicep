@@ -14,6 +14,9 @@ param secretKey string = newGuid()
 
 var appName = '${namePrefix}app'
 
+var subnetAddressPrefix = '10.1.0.0/24'
+var addressPrefix = '10.1.0.0/16'
+
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: '${appName}-logs'
   location: location
@@ -24,10 +27,27 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10
   }
 }
 
+module network 'modules/network.bicep' = {
+  name: 'networkModule'
+  params: {
+    location: location
+    virtualNetworkName: '${appName}-vnet'
+    subnetName: '${appName}-subnet'
+    networkSecurityGroupName: '${appName}-nsg'
+    addressPrefix: addressPrefix
+    subnetAddressPrefix: subnetAddressPrefix
+  }
+}
+
+var networkSubnetId = network.outputs.networkSubnetId
+
 resource containerAppEnv 'Microsoft.App/managedEnvironments@2025-01-01' = {
   name: '${appName}-env'
   location: location
   properties: {
+    vnetConfiguration: {
+      infrastructureSubnetId: networkSubnetId
+    }
     appLogsConfiguration: {
       destination: 'log-analytics'
       logAnalyticsConfiguration: {
@@ -112,7 +132,7 @@ resource mysqlApp 'Microsoft.App/containerApps@2025-01-01' = {
   }
 }
 
-var mysqlDatabaseUrl = 'mysql+pymysql://root:${mysqlAdminPassword}@https://${mysqlApp.properties.configuration.ingress.fqdn}:3306/'
+var mysqlDatabaseUrl = 'mysql+pymysql://root:${mysqlAdminPassword}@${mysqlApp.name}.internal:3306/'
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
   name: acrName
@@ -189,11 +209,11 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
             }
             {
               name: 'DATABASE_URL'
-              value: 'mysql+pymysql://root:${mysqlAdminPassword}@${mysqlDatabaseUrl}'
+              value: mysqlDatabaseUrl
             }
             {
               name: 'REDIS_URL'
-              value: 'redis://${redisApp.properties.configuration.ingress.fqdn}:6379'
+              value: 'redis://${redisApp.name}.internal:6379'
             }
             {
               name: 'ALGORITHM'
