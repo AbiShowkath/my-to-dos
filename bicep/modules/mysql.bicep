@@ -81,7 +81,7 @@ resource server 'Microsoft.DBforMySQL/flexibleServers@2024-12-30' = {
     version: version
     administratorLogin: administratorLogin
     administratorLoginPassword: administratorLoginPassword
-    availabilityZone: 1
+    availabilityZone: availabilityZone
     highAvailability: {
       mode: haEnabled
       standbyAvailabilityZone: standbyAvailabilityZone

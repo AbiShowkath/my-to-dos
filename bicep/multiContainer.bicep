@@ -6,16 +6,16 @@ param acrLoginServer string = '${acrName}.azurecr.io'
 param frontendImage string = '${acrLoginServer}/${namePrefix}-app:latest'
 param backendImage string = '${acrLoginServer}/${namePrefix}-api:latest'
 
-@secure()
-param mysqlAdminPassword string = 'newGuid()'
+// @secure()
+// param mysqlAdminPassword string = 'newGuid()'
 
 @secure()
 param secretKey string = newGuid()
 
 var appName = '${namePrefix}app'
 
-var subnetAddressPrefix = '10.1.0.0/22'
-var addressPrefix = '10.1.0.0/16'
+// var subnetAddressPrefix = '10.1.0.0/22'
+// var addressPrefix = '10.1.0.0/16'
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: '${appName}-logs'
