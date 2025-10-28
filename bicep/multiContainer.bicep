@@ -6,16 +6,16 @@ param acrLoginServer string = '${acrName}.azurecr.io'
 param frontendImage string = '${acrLoginServer}/${namePrefix}-app:latest'
 param backendImage string = '${acrLoginServer}/${namePrefix}-api:latest'
 
-// @secure()
-// param mysqlAdminPassword string = 'newGuid()'
+@secure()
+param mysqlAdminPassword string = newGuid()
 
 @secure()
 param secretKey string = newGuid()
 
 var appName = '${namePrefix}app'
 
-// var subnetAddressPrefix = '10.1.0.0/22'
-// var addressPrefix = '10.1.0.0/16'
+var subnetAddressPrefix = '10.1.0.0/22'
+var addressPrefix = '10.1.0.0/16'
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: '${appName}-logs'
@@ -27,17 +27,17 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10
   }
 }
 
-// module network 'modules/network.bicep' = {
-//   name: 'networkModule'
-//   params: {
-//     location: location
-//     virtualNetworkName: '${appName}-vnet'
-//     subnetName: '${appName}-subnet'
-//     networkSecurityGroupName: '${appName}-nsg'
-//     addressPrefix: addressPrefix
-//     subnetAddressPrefix: subnetAddressPrefix
-//   }
-// }
+module network 'modules/network.bicep' = {
+  name: 'networkModule'
+  params: {
+    location: location
+    virtualNetworkName: '${appName}-vnet'
+    subnetName: '${appName}-subnet'
+    networkSecurityGroupName: '${appName}-nsg'
+    addressPrefix: addressPrefix
+    subnetAddressPrefix: subnetAddressPrefix
+  }
+}
 
 // var networkSubnetId = network.outputs.networkSubnetId
 
@@ -45,9 +45,9 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2025-01-01' = {
   name: '${appName}-env'
   location: location
   properties: {
-    // vnetConfiguration: {
-    //   infrastructureSubnetId: networkSubnetId
-    // }
+    vnetConfiguration: {
+      infrastructureSubnetId: resourceId('Microsoft.Network/virtualNetworks/subnets', '${appName}-vnet', '${appName}-subnet')
+    }
     appLogsConfiguration: {
       destination: 'log-analytics'
       logAnalyticsConfiguration: {
@@ -58,93 +58,93 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2025-01-01' = {
   }
 }
 
-// resource redisApp 'Microsoft.App/containerApps@2025-01-01' = {
-//   name: '${appName}_redis'
-//   location: location
-//   properties: {
-//     managedEnvironmentId: containerAppEnv.id
-//     configuration: {
-//       ingress: {
-//         external: false
-//         targetPort: 6379
-//         // transport: 'tcp'
-//         allowInsecure: true
-//       }
-//     }
-//     template: {
-//       containers: [
-//         {
-//           name: 'redis'
-//           image: 'redis:alpine'
-//           resources: {
-//             cpu: 1
-//             memory: '2.0Gi'
-//           }
-//         }
-//       ]
-//       scale: {
-//         minReplicas: 1
-//         maxReplicas: 1
-//       }
-//     }
-//   }
-// }
+resource redisApp 'Microsoft.App/containerApps@2025-01-01' = {
+  name: '${appName}_redis'
+  location: location
+  properties: {
+    managedEnvironmentId: containerAppEnv.id
+    configuration: {
+      ingress: {
+        external: true
+        targetPort: 6379
+        // transport: 'tcp'
+        allowInsecure: true
+      }
+    }
+    template: {
+      containers: [
+        {
+          name: 'redis'
+          image: 'redis:alpine'
+          resources: {
+            cpu: 1
+            memory: '2.0Gi'
+          }
+        }
+      ]
+      scale: {
+        minReplicas: 1
+        maxReplicas: 1
+      }
+    }
+  }
+}
 
-// resource mysqlApp 'Microsoft.App/containerApps@2025-01-01' = {
-//   name: '${appName}_mysql'
-//   location: location
-//   properties: {
-//     managedEnvironmentId: containerAppEnv.id
-//     configuration: {
-//       ingress: {
-//         external: false
-//         targetPort: 3306
-//         // transport: 'tcp'
-//         allowInsecure: true
-//       }
-//     }
-//     template: {
-//       containers: [
-//         {
-//           name: 'mysql'
-//           image: 'mysql:8.0'
-//           resources: {
-//             cpu: 1
-//             memory: '2.0Gi'
-//           }
-//           env: [
-//             {
-//               name: 'MYSQL_ROOT_PASSWORD'
-//               value: mysqlAdminPassword
-//             }
-//             {
-//               name: 'MYSQL_DATABASE'
-//               value: 'mytodo'
-//             }
-//           ]
-//         }
-//       ]
-//       scale: {
-//         minReplicas: 1
-//         maxReplicas: 1
-//       }
-//     }
-//   }
-// }
+resource mysqlApp 'Microsoft.App/containerApps@2025-01-01' = {
+  name: '${appName}_mysql'
+  location: location
+  properties: {
+    managedEnvironmentId: containerAppEnv.id
+    configuration: {
+      ingress: {
+        external: true
+        targetPort: 3306
+        // transport: 'tcp'
+        allowInsecure: true
+      }
+    }
+    template: {
+      containers: [
+        {
+          name: 'mysql'
+          image: 'mysql:8.0'
+          resources: {
+            cpu: 1
+            memory: '2.0Gi'
+          }
+          env: [
+            {
+              name: 'MYSQL_ROOT_PASSWORD'
+              value: mysqlAdminPassword
+            }
+            {
+              name: 'MYSQL_DATABASE'
+              value: 'mytodo'
+            }
+          ]
+        }
+      ]
+      scale: {
+        minReplicas: 1
+        maxReplicas: 1
+      }
+    }
+  }
+}
 
-// var mysqlDatabaseUrl = 'mysql+pymysql://root:${mysqlAdminPassword}@${mysqlApp.name}.internal:3306/'
+var mysqlDatabaseUrl = 'mysql+pymysql://root:${mysqlAdminPassword}@${mysqlApp.properties.configuration.ingress.fqdn}:3306/'
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
   name: acrName
 }
 
-resource mysqlApp 'Microsoft.DBforMySQL/flexibleServers@2024-12-30' existing = {
-  name: '${appName}sqlserver'
-}
+// resource mysqlApp 'Microsoft.DBforMySQL/flexibleServers@2024-12-30' existing = {
+//   name: '${appName}sqlserver'
+// }
 
-resource redisApp 'Microsoft.Cache/redis@2024-11-01' existing = {
-  name: '${namePrefix}-redis'
-}
+// resource redisApp 'Microsoft.Cache/redis@2024-11-01' existing = {
+//   name: '${namePrefix}-redis'
+// }
 
 resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
   name: '${appName}-backend'
@@ -153,7 +153,7 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
     managedEnvironmentId: containerAppEnv.id
     configuration: {
       ingress: {
-        external: false
+        external: true
         targetPort: 8000
         // transport: 'auto'
         allowInsecure: true
@@ -185,7 +185,8 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
           env: [
             {
               name: 'MYSQL_HOST'
-              value: mysqlApp.properties.fullyQualifiedDomainName
+              // value: mysqlApp.properties.fullyQualifiedDomainName
+              value: mysqlApp.properties.configuration.ingress.fqdn
             }
             {
               name: 'MYSQL_PORT'
@@ -217,7 +218,8 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
             }
             {
               name: 'DATABASE_URL'
-              value: 'mysql+pymysql://sqladminuser:sqlAdminPassword123@${mysqlApp.properties.fullyQualifiedDomainName}:3306/'
+              // value: 'mysql+pymysql://sqladminuser:sqlAdminPassword123@${mysqlApp.properties.fullyQualifiedDomainName}:3306/'
+              value: mysqlDatabaseUrl
             }
             {
               name: 'REDIS_URL'
