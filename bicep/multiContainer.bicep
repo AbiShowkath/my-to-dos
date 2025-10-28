@@ -59,7 +59,7 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2025-01-01' = {
 }
 
 resource redisApp 'Microsoft.App/containerApps@2025-01-01' = {
-  name: '${appName}_redis'
+  name: '${appName}-redis'
   location: location
   properties: {
     managedEnvironmentId: containerAppEnv.id
@@ -67,7 +67,7 @@ resource redisApp 'Microsoft.App/containerApps@2025-01-01' = {
       ingress: {
         external: true
         targetPort: 6379
-        // transport: 'tcp'
+        transport: 'tcp'
         allowInsecure: true
       }
     }
@@ -91,7 +91,7 @@ resource redisApp 'Microsoft.App/containerApps@2025-01-01' = {
 }
 
 resource mysqlApp 'Microsoft.App/containerApps@2025-01-01' = {
-  name: '${appName}_mysql'
+  name: '${appName}-mysql'
   location: location
   properties: {
     managedEnvironmentId: containerAppEnv.id
@@ -99,7 +99,7 @@ resource mysqlApp 'Microsoft.App/containerApps@2025-01-01' = {
       ingress: {
         external: true
         targetPort: 3306
-        // transport: 'tcp'
+        transport: 'tcp'
         allowInsecure: true
       }
     }
@@ -155,7 +155,7 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
       ingress: {
         external: true
         targetPort: 8000
-        // transport: 'auto'
+        transport: 'auto'
         allowInsecure: true
       }
       secrets: [
@@ -254,7 +254,7 @@ resource frontendApp 'Microsoft.App/containerApps@2025-01-01' = {
         external: true
         targetPort: 3000
         allowInsecure: true
-        transport: 'http'
+        transport: 'auto'
       }
       secrets: [
         {
