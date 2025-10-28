@@ -160,7 +160,7 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
       }
       secrets: [
         {
-          name: 'acr_password'
+          name: 'acr-password'
           value: acr.listCredentials().passwords[0].value
         }
       ]
@@ -168,7 +168,7 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
         {
           server: acrLoginServer
           username: acr.listCredentials().username
-          passwordSecretRef: 'acr_password'
+          passwordSecretRef: 'acr-password'
         }
       ]
     }
@@ -258,7 +258,7 @@ resource frontendApp 'Microsoft.App/containerApps@2025-01-01' = {
       }
       secrets: [
         {
-          name: 'acr_password'
+          name: 'acr-password'
           value: acr.listCredentials().passwords[0].value
         }
       ]
@@ -266,7 +266,7 @@ resource frontendApp 'Microsoft.App/containerApps@2025-01-01' = {
         {
           server: acrLoginServer
           username: acr.listCredentials().username
-          passwordSecretRef: 'acr_password'
+          passwordSecretRef: 'acr-password'
         }
       ]
     }
