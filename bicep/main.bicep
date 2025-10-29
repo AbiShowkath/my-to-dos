@@ -8,7 +8,6 @@ param location string = resourceGroup().location
 @description('Provide a globally unique name of your Azure Container Registry')
 param acrName string = '${namePrefix}acr${uniqueString(resourceGroup().id)}'
 
-var appName = '${namePrefix}app'
 var subnetAddressPrefix = '10.1.0.0/22'
 var addressPrefix = '10.1.0.0/16'
 
@@ -56,9 +55,9 @@ module network 'modules/network.bicep' = {
   name: 'networkModule'
   params: {
     location: location
-    virtualNetworkName: '${appName}-vnet'
-    subnetName: '${appName}-subnet'
-    networkSecurityGroupName: '${appName}-nsg'
+    virtualNetworkName: '${namePrefix}-vnet'
+    subnetName: '${namePrefix}-subnet'
+    networkSecurityGroupName: '${namePrefix}-nsg'
     addressPrefix: addressPrefix
     subnetAddressPrefix: subnetAddressPrefix
   }
