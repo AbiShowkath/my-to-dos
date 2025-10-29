@@ -65,7 +65,7 @@ resource redisApp 'Microsoft.App/containerApps@2025-01-01' = {
     managedEnvironmentId: containerAppEnv.id
     configuration: {
       ingress: {
-        external: false
+        external: true
         targetPort: 6379
         transport: 'tcp'
         allowInsecure: false
@@ -97,7 +97,7 @@ resource mysqlApp 'Microsoft.App/containerApps@2025-01-01' = {
     managedEnvironmentId: containerAppEnv.id
     configuration: {
       ingress: {
-        external: false
+        external: true
         targetPort: 3306
         transport: 'tcp'
         allowInsecure: false
@@ -153,7 +153,7 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
     managedEnvironmentId: containerAppEnv.id
     configuration: {
       ingress: {
-        external: false
+        external: true
         targetPort: 8000
         transport: 'auto'
         allowInsecure: false
