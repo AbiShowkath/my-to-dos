@@ -14,8 +14,8 @@ param secretKey string = newGuid()
 
 var appName = '${namePrefix}app'
 
-var subnetAddressPrefix = '10.1.0.0/22'
-var addressPrefix = '10.1.0.0/16'
+// var subnetAddressPrefix = '10.1.0.0/22'
+// var addressPrefix = '10.1.0.0/16'
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: '${appName}-logs'
@@ -27,17 +27,17 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10
   }
 }
 
-module network 'modules/network.bicep' = {
-  name: 'networkModule'
-  params: {
-    location: location
-    virtualNetworkName: '${appName}-vnet'
-    subnetName: '${appName}-subnet'
-    networkSecurityGroupName: '${appName}-nsg'
-    addressPrefix: addressPrefix
-    subnetAddressPrefix: subnetAddressPrefix
-  }
-}
+// module network 'modules/network.bicep' = {
+//   name: 'networkModule'
+//   params: {
+//     location: location
+//     virtualNetworkName: '${appName}-vnet'
+//     subnetName: '${appName}-subnet'
+//     networkSecurityGroupName: '${appName}-nsg'
+//     addressPrefix: addressPrefix
+//     subnetAddressPrefix: subnetAddressPrefix
+//   }
+// }
 
 // var networkSubnetId = network.outputs.networkSubnetId
 
@@ -65,7 +65,7 @@ resource redisApp 'Microsoft.App/containerApps@2025-01-01' = {
     managedEnvironmentId: containerAppEnv.id
     configuration: {
       ingress: {
-        external: true
+        external: false
         targetPort: 6379
         transport: 'tcp'
         allowInsecure: false
@@ -97,7 +97,7 @@ resource mysqlApp 'Microsoft.App/containerApps@2025-01-01' = {
     managedEnvironmentId: containerAppEnv.id
     configuration: {
       ingress: {
-        external: true
+        external: false
         targetPort: 3306
         transport: 'tcp'
         allowInsecure: false
@@ -153,7 +153,7 @@ resource backendApp 'Microsoft.App/containerApps@2025-01-01' = {
     managedEnvironmentId: containerAppEnv.id
     configuration: {
       ingress: {
-        external: true
+        external: false
         targetPort: 8000
         transport: 'auto'
         allowInsecure: false
@@ -282,7 +282,7 @@ resource frontendApp 'Microsoft.App/containerApps@2025-01-01' = {
           env: [
             {
               name: 'REACT_APP_BASE_URL'
-              value: 'https://${backendApp.properties.configuration.ingress.fqdn}:8000'
+              value: 'https://${backendApp.properties.configuration.ingress.fqdn}'
             }
           ]
         }
