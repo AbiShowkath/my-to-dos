@@ -1,0 +1,32 @@
+name: API Trigger Test Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: "Enter name"
+        required: true
+        type: string
+      environment:
+        description: "Environment"
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+
+jobs:
+  test-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print inputs
+        run: |
+          echo "Name: ${{ github.event.inputs.name }}"
+          echo "Environment: ${{ github.event.inputs.environment }}"
+
+      - name: Sample task
+        run: |
+          echo "Running test workflow..."
+          sleep 10
+          echo "Done ✅"
