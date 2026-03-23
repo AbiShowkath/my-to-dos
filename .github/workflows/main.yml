@@ -64,5 +64,5 @@ jobs:
       - name: Sample task
         run: |
           echo "Running test workflow..."
-          sleep 10
+          sleep 120
           echo "Done ✅"
