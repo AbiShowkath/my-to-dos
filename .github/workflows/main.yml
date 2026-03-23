@@ -3,17 +3,49 @@ name: API Trigger Test Workflow
 on:
   workflow_dispatch:
     inputs:
-      name:
-        description: "Enter name"
+      suite:
+        description: "Enter suite name"
         required: true
         type: string
-      environment:
-        description: "Environment"
+      browser:
+        description: "Brower"
+        required: true
+        type: choice
+        options:
+          - chrome
+          - firefox
+      environment: 
+        description: "Enter Environment"
         required: true
         type: choice
         options:
           - dev
           - staging
+      s3_prefix: 
+        description: "Enter s3 prefix"
+        required: true
+        type: string
+        default: "/dev/test-result-zip-file/reya/upload"
+      test_run_id: 
+        description: "Test Run Id"
+        required: true
+        type: string
+      tenantId: 
+        description: "Tenant ID"
+        required: true
+        type: string
+      applicationId: 
+        description: "Application ID"
+        required: true
+        type: string
+      test_execution_id: 
+        description: "Test Execution Id"
+        required: true
+        type: string
+      test_execution_request_id: 
+        description: "Test Execution Request Id"
+        required: true
+        type: string
 
 jobs:
   test-job:
@@ -22,8 +54,12 @@ jobs:
     steps:
       - name: Print inputs
         run: |
-          echo "Name: ${{ github.event.inputs.name }}"
-          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Suite: ${{ github.event.inputs.suite }}"
+          echo "browser: ${{ github.event.inputs.browser }}"
+          echo "applicationId: ${{ github.event.inputs.applicationId }}"
+          echo "test_run_id: ${{ github.event.inputs.test_run_id }}"
+          echo "test_execution_id: ${{ github.event.inputs.test_execution_id }}"
+          echo "test_execution_request_id: ${{ github.event.inputs.test_execution_request_id }}"
 
       - name: Sample task
         run: |
